@@ -13,7 +13,7 @@ class CodeParserManager:
     - supported_languages (list): A list of all supported programming languages by the loaded parsers.
     """
 
-    def __init__(self):
+    def __init__(self, load_parsers: bool = False):
         """
         Initializes a new instance of the CodeParserManager class.
 
@@ -25,6 +25,10 @@ class CodeParserManager:
         self.parsers = []
         self.supported_languages = []
         self.data = []
+        self.loaded_parsers = False
+        # maybe change to True?
+        if load_parsers:
+            self.load_parsers()
 
     def load_parsers(self) -> None:
         """
@@ -36,6 +40,8 @@ class CodeParserManager:
         Returns:
         - None
         """
+        self.loaded_parsers = True
+
         parser_files = [
             f
             for f in os.listdir(self.parsers_directory)
@@ -89,6 +95,9 @@ class CodeParserManager:
         Returns:
         - None
         """
+        if not self.loaded_parsers:
+            self.load_parsers()
+
         for directory_name, _, files in os.walk(root_directory):
             if any(x in directory_name for x in ignore_folders):
                 continue
@@ -129,11 +138,9 @@ if __name__ == "__main__":
     start_time = datetime.now()
     IGNORE_FOLDERS = ["venv", "idea"]
     IGNORE_FILES = []
-    files = 0
-    parserdasda = 0
     # FOLDER = "test_files"
     FOLDER = "/home/luke/PycharmProjects/You-are-Pythonista"
-    parser = CodeParserManager()
+    parser = CodeParserManager(load_parsers=False)
     parser.load_parsers()
     fiLES = parser.parse(
         FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
