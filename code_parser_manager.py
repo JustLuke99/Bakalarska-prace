@@ -21,6 +21,7 @@ class CodeParserManager:
         Parameters:
         - None
         """
+        # TODO change it to cfg
         self.parsers_directory = "code_parsers"
         self.parsers = []
         self.supported_languages = []
@@ -48,9 +49,9 @@ class CodeParserManager:
 
             try:
                 module = importlib.import_module(module_path)
-                parser_class = getattr(
-                    module, module_name.split("_")[0].capitalize() + "Parser"
-                )
+                classes = [cls for cls in dir(module) if isinstance(getattr(module, cls), type)]
+
+                parser_class = getattr(module, classes[-1])
                 supported_languages = parser_class().get_languages()
                 for language in supported_languages:
                     if language not in self.supported_languages:
@@ -78,7 +79,6 @@ class CodeParserManager:
         Returns:
         - None
         """
-        sd, sd2 = 0, 0
         for directory_name, _, files in os.walk(root_directory):
             if any(x in directory_name for x in ignore_folders):
                 continue
@@ -125,9 +125,9 @@ if __name__ == "__main__":
     FOLDER = "/home/luke/PycharmProjects/You-are-Pythonista"
     parser = CodeParserManager()
     parser.load_parsers()
-    fiLES = parser.parse(
-        FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
-    )
-    print("Size of data: ", sys.getsizeof(parser.data))
-    print("Time taken: ", datetime.now() - start_time)
-    print(fiLES)
+    # fiLES = parser.parse(
+    #     FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
+    # )
+    # print("Size of data: ", sys.getsizeof(parser.data))
+    # print("Time taken: ", datetime.now() - start_time)
+    # print(fiLES)
