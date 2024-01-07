@@ -1,6 +1,7 @@
 import os
-import radon.raw as radon_raw
+
 import radon.complexity as radon_complexity
+import radon.raw as radon_raw
 from radon.metrics import (
     h_visit,
     h_visit_ast,
@@ -18,9 +19,6 @@ class RadonParser(BaseParser):
     def __init__(self):
         super().__init__()
         self.loc = 0
-
-    def get_languages(self):
-        return self.supported_languages
 
     def parse(self, directory_name, file_name):
         try:

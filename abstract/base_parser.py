@@ -5,7 +5,7 @@ class BaseParser:
         self.return_data = None
 
     def get_languages(self):
-        raise NotImplementedError
+        return self.supported_languages
 
     def parse(self, **kwargs):
         raise NotImplementedError

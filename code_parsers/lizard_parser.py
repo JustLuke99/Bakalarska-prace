@@ -9,9 +9,6 @@ class LizardParser(BaseParser):
     def __init__(self):
         super().__init__()
 
-    def get_languages(self):
-        return self.supported_languages
-
     def parse(self, directory_name, file_name):
         data = lizard.analyze_file(os.path.join(directory_name, file_name))
         self.return_data = {

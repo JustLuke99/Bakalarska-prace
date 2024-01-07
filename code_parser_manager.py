@@ -1,6 +1,5 @@
-import os
 import importlib
-import sys
+import os
 from datetime import datetime
 
 
@@ -49,23 +48,34 @@ class CodeParserManager:
 
             try:
                 module = importlib.import_module(module_path)
-                classes = [cls for cls in dir(module) if isinstance(getattr(module, cls), type)]
+            except Exception as e:
+                raise AttributeError(f"Cant import module from file {parser_file}. {e}")
 
-                parser_class = getattr(module, classes[-1])
+            classes = [
+                cls for cls in dir(module) if isinstance(getattr(module, cls), type)
+            ]
+
+            if not classes:
+                raise AttributeError(f"File {parser_file} doesnt have class.")
+
+            parser_class = getattr(module, classes[-1])
+            try:
                 supported_languages = parser_class().get_languages()
-                for language in supported_languages:
-                    if language not in self.supported_languages:
-                        self.supported_languages.append(language)
-
-                self.parsers.append(
-                    {
-                        "class": parser_class(),
-                        "supported_languages": parser_class().get_languages(),
-                    }
+            except Exception as e:
+                raise NotImplementedError(
+                    f"In {parser_file} is missing get_languages()"
                 )
 
-            except (ImportError, AttributeError) as e:
-                print(f"Failed to load parser from {parser_file}: {e}")
+            for language in supported_languages:
+                if language not in self.supported_languages:
+                    self.supported_languages.append(language)
+
+            self.parsers.append(
+                {
+                    "class": parser_class(),
+                    "supported_languages": parser_class().get_languages(),
+                }
+            )
 
     def parse(self, root_directory: str, ignore_files=[], ignore_folders=[]) -> None:
         """
@@ -125,9 +135,9 @@ if __name__ == "__main__":
     FOLDER = "/home/luke/PycharmProjects/You-are-Pythonista"
     parser = CodeParserManager()
     parser.load_parsers()
-    # fiLES = parser.parse(
-    #     FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
-    # )
-    # print("Size of data: ", sys.getsizeof(parser.data))
-    # print("Time taken: ", datetime.now() - start_time)
-    # print(fiLES)
+    fiLES = parser.parse(
+        FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
+    )
+    print("Size of data: ", sys.getsizeof(parser.data))
+    print("Time taken: ", datetime.now() - start_time)
+    print(fiLES)
