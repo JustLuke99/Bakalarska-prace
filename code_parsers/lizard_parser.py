@@ -4,8 +4,9 @@ import os
 
 
 class LizardParser(BaseParser):
-    supported_languages = ["py", "cpp"] # TODO add "c"
+    supported_languages = ["py", "cpp"]  # TODO add "c"
 
+    # TODO delete it
     def __init__(self):
         super().__init__()
 
@@ -18,8 +19,19 @@ class LizardParser(BaseParser):
             "average_token_count": data.average_token_count,
             "nloc": data.nloc,
             "token_count": data.token_count,
-            "functions": [{"cyclomatic_complexity": func.cyclomatic_complexity, "end_line": func.end_line, "func_name": func.name, "start_line": func.start_line, "nloc": func.nloc, "token_count": func.token_count, "parameters_count": func.parameter_count, "length": func.length} for func in data.function_list]
+            "functions": [
+                {
+                    "cyclomatic_complexity": func.cyclomatic_complexity,
+                    "end_line": func.end_line,
+                    "func_name": func.name,
+                    "start_line": func.start_line,
+                    "nloc": func.nloc,
+                    "token_count": func.token_count,
+                    "parameters_count": func.parameter_count,
+                    "length": func.length,
+                }
+                for func in data.function_list
+            ],
         }
 
         return self.return_data
-
