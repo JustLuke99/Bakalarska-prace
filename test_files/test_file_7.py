@@ -83,6 +83,9 @@ def open_zip(my_pw_found, file_name, start, end):
         if my_pw_found.value:
             break
 
+def hehe():
+    open_zip("da","da","da","da")
+
 if __name__ == "__main__":
     start_time = time.time()
     pdf_file_path, unlock_mode, file_type = get_data()

@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 
 
-class CodeParserManager:
+class IndicatorsManager:
     """
     Manages a collection of code parsers and facilitates parsing of code files in a directory.
 
@@ -37,9 +37,9 @@ class CodeParserManager:
         self.loaded_parsers = False
         # maybe change to True?
         if load_parsers:
-            self.load_parsers()
+            self.load_indicators()
 
-    def load_parsers(self) -> None:
+    def load_indicators(self) -> None:
         """
         Loads code parsers from the specified directory and updates supported_languages.
 
@@ -52,9 +52,7 @@ class CodeParserManager:
         self.loaded_parsers = True
 
         parser_files = [
-            f
-            for f in os.listdir(self.parsers_directory)
-            if f.endswith(".py")
+            f for f in os.listdir(self.parsers_directory) if f.endswith(".py")
         ]
 
         for parser_file in parser_files:
@@ -73,7 +71,9 @@ class CodeParserManager:
             if not classes:
                 raise AttributeError(f"File {parser_file} doesnt have class.")
 
-            parser_class = getattr(module, classes[-1])
+            parse_class = [classX for classX in classes if classX != "BaseParser" and "parser" in classX.lower()]
+
+            parser_class = getattr(module, parse_class[0])
             try:
                 supported_languages = parser_class().get_languages()
             except Exception as e:
@@ -89,10 +89,11 @@ class CodeParserManager:
                 {
                     "class": parser_class(),
                     "supported_languages": parser_class().get_languages(),
+                    "parser_name": parse_class[0]
                 }
             )
 
-    def parse(self, root_directory: str, ignore_files=[], ignore_folders=[]) -> None:
+    def parse(self, root_directory: str, ignore_files: list=[], ignore_folders: list=[]) -> None:
         """
         Parses code files in the specified root directory using loaded parsers.
 
@@ -105,17 +106,19 @@ class CodeParserManager:
         - None
         """
         if not self.loaded_parsers:
-            self.load_parsers()
+            self.load_indicators()
 
         for directory_name, _, files in os.walk(root_directory):
             if any(x in directory_name for x in ignore_folders):
                 continue
 
             for file in files:
+                if "." not in file:
+                    file += ".bin"
+
                 if not (
                     any(file.endswith(ext) for ext in self.supported_languages)
                     or any(x in file for x in ignore_files)
-                    or not "." in file
                 ):
                     continue
 
@@ -137,7 +140,8 @@ class CodeParserManager:
                     self.data.append(
                         {
                             "file_path": os.path.join(directory_name, file),
-                            "file_type": file.rsplit(".")[1],
+                            "file_type": file.rsplit(".")[-1],
+                            "parser_name": code_parser["parser_name"],
                             "data": data,
                         }
                     )
@@ -148,12 +152,14 @@ if __name__ == "__main__":
     IGNORE_FOLDERS = ["venv", "idea"]
     IGNORE_FILES = []
     # FOLDER = "test_files"
-    FOLDER = "/home/luke/PycharmProjects/You-are-Pythonista"
-    parser = CodeParserManager(load_parsers=False)
-    parser.load_parsers()
+    FOLDER = "./test_files/"
+    parser = IndicatorsManager(load_parsers=False)
+    parser.load_indicators()
     fiLES = parser.parse(
         FOLDER, ignore_files=IGNORE_FILES, ignore_folders=IGNORE_FOLDERS
     )
     print("Size of data: ", sys.getsizeof(parser.data))
     print("Time taken: ", datetime.now() - start_time)
     print(fiLES)
+
+

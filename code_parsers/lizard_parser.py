@@ -22,7 +22,6 @@ class LizardParser(BaseParser):
     supported_languages = ["py", "cpp"]  # TODO add "c"
 
     def parse(self, file_path: str) -> Data:
-        print(file_path)
         data = lizard.analyze_file(file_path)
         return_data: Data = {
             "ccn": data.CCN,
