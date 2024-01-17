@@ -1,4 +1,6 @@
 import os
+from typing import TypedDict, List, Dict, Tuple
+from typing_extensions import Union
 
 import radon.complexity as radon_complexity
 import radon.raw as radon_raw
@@ -12,17 +14,35 @@ from radon.metrics import (
 
 from code_parsers.lizard_parser import BaseParser
 
+Data = TypedDict(
+    "Data",
+    {
+        "loc": int,
+        "lloc": int,
+        "sloc": int,
+        "comments": int,
+        "multi": int,
+        "single_comments": int,
+        "blank": int,
+        "mi_visit": float,
+        "mi_parameters": Tuple[float, int, int, float],
+        "mi_compute": float,
+        "complexity": List[Dict[str, Union[int, str]]],
+    },
+)
+
 
 class RadonParser(BaseParser):
     supported_languages = ["py"]
 
-    def __init__(self):
-        super().__init__()
-        self.loc = 0
-
-    def parse(self, directory_name, file_name):
+    def parse(self, file_path: str) -> Data:
         try:
-            f = open(os.path.join(directory_name, file_name), "r", encoding='utf-8', errors='replace')
+            f = open(
+                file_path,
+                "r",
+                encoding="utf-8",
+                errors="replace",
+            )
         except UnicodeDecodeError as e:
             print(e)
             return
@@ -38,8 +58,7 @@ class RadonParser(BaseParser):
             parameters[0], parameters[1], parameters[2], parameters[3]
         )
 
-        self.loc += int(raw_metrics.loc)
-        self.return_data: dict = {
+        return_data: Data = {
             "loc": raw_metrics.loc,
             "lloc": raw_metrics.lloc,
             "sloc": raw_metrics.sloc,
@@ -58,4 +77,4 @@ class RadonParser(BaseParser):
             ],
         }
 
-        return self.return_data
+        return return_data

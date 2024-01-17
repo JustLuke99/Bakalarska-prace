@@ -1,18 +1,30 @@
 from abstract.base_parser import BaseParser
 import lizard
 import os
+from typing import TypedDict, List, Dict, Tuple
+from typing_extensions import Union
+
+Data = TypedDict(
+    "Data",
+    {
+        "ccn": int,
+        "average_cyclomatic_complexity": float,
+        "average_nloc": float,
+        "average_token_count": float,
+        "nloc": int,
+        "token_count": int,
+        "functions": List[Dict[str, Union[int, str]]],
+    },
+)
 
 
 class LizardParser(BaseParser):
     supported_languages = ["py", "cpp"]  # TODO add "c"
 
-    # TODO delete it
-    def __init__(self):
-        super().__init__()
-
-    def parse(self, directory_name, file_name):
-        data = lizard.analyze_file(os.path.join(directory_name, file_name))
-        self.return_data = {
+    def parse(self, file_path: str) -> Data:
+        print(file_path)
+        data = lizard.analyze_file(file_path)
+        return_data: Data = {
             "ccn": data.CCN,
             "average_cyclomatic_complexity": data.average_cyclomatic_complexity,
             "average_nloc": data.average_nloc,
@@ -34,4 +46,4 @@ class LizardParser(BaseParser):
             ],
         }
 
-        return self.return_data
+        return return_data

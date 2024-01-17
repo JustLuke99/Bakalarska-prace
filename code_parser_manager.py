@@ -1,6 +1,7 @@
 import importlib
 import os
 from datetime import datetime
+import sys
 
 
 class CodeParserManager:
@@ -12,6 +13,14 @@ class CodeParserManager:
     - parsers (list): A list of dictionaries, each containing a parser class and its supported languages.
     - supported_languages (list): A list of all supported programming languages by the loaded parsers.
     """
+
+    __slots__ = [
+        "parsers_directory",
+        "parsers",
+        "supported_languages",
+        "data",
+        "loaded_parsers",
+    ]
 
     def __init__(self, load_parsers: bool = False):
         """
@@ -45,7 +54,7 @@ class CodeParserManager:
         parser_files = [
             f
             for f in os.listdir(self.parsers_directory)
-            if f.endswith(".py") and not f.startswith("__")
+            if f.endswith(".py")
         ]
 
         for parser_file in parser_files:
@@ -119,7 +128,7 @@ class CodeParserManager:
                     try:
                         _ = file.rsplit(".")[1]
                         data = code_parser["class"].parse(
-                            directory_name=directory_name, file_name=file
+                            file_path=os.path.join(directory_name, file)
                         )
                     except Exception as e:
                         print(f"File: {os.path.join(directory_name, file)}: {e}")
