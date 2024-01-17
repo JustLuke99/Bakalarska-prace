@@ -20,6 +20,7 @@ class IndicatorsManager:
         "supported_languages",
         "data",
         "loaded_parsers",
+        "parsers_dir_name",
     ]
 
     def __init__(self, load_parsers: bool = False):
@@ -30,7 +31,8 @@ class IndicatorsManager:
         - None
         """
         # TODO change it to cfg
-        self.parsers_directory = "code_parsers"
+        self.parsers_directory = "indicators/code_parsers"
+        self.parsers_dir_name = "code_parsers"
         self.parsers = []
         self.supported_languages = []
         self.data = []
@@ -52,12 +54,14 @@ class IndicatorsManager:
         self.loaded_parsers = True
 
         parser_files = [
-            f for f in os.listdir(self.parsers_directory) if f.endswith(".py")
+            f
+            for f in os.listdir(os.path.join(os.getcwd(), self.parsers_directory))
+            if f.endswith(".py")
         ]
 
         for parser_file in parser_files:
             module_name = os.path.splitext(parser_file)[0]
-            module_path = f"{self.parsers_directory}.{module_name}"
+            module_path = f"{self.parsers_dir_name}.{module_name}"
 
             try:
                 module = importlib.import_module(module_path)
@@ -71,7 +75,11 @@ class IndicatorsManager:
             if not classes:
                 raise AttributeError(f"File {parser_file} doesnt have class.")
 
-            parse_class = [classX for classX in classes if classX != "BaseParser" and "parser" in classX.lower()]
+            parse_class = [
+                classX
+                for classX in classes
+                if classX != "BaseParser" and "parser" in classX.lower()
+            ]
 
             parser_class = getattr(module, parse_class[0])
             try:
@@ -89,11 +97,13 @@ class IndicatorsManager:
                 {
                     "class": parser_class(),
                     "supported_languages": parser_class().get_languages(),
-                    "parser_name": parse_class[0]
+                    "parser_name": parse_class[0],
                 }
             )
 
-    def parse(self, root_directory: str, ignore_files: list=[], ignore_folders: list=[]) -> None:
+    def parse(
+        self, root_directory: str, ignore_files: list = [], ignore_folders: list = []
+    ) -> None:
         """
         Parses code files in the specified root directory using loaded parsers.
 
@@ -122,6 +132,7 @@ class IndicatorsManager:
                 ):
                     continue
 
+                parser_data = []
                 for code_parser in self.parsers:
                     if not any(
                         file.endswith(ext) for ext in code_parser["supported_languages"]
@@ -137,14 +148,16 @@ class IndicatorsManager:
                         print(f"File: {os.path.join(directory_name, file)}: {e}")
                         continue
 
-                    self.data.append(
-                        {
-                            "file_path": os.path.join(directory_name, file),
-                            "file_type": file.rsplit(".")[-1],
-                            "parser_name": code_parser["parser_name"],
-                            "data": data,
-                        }
-                    )
+                    parser_data.append(data)
+
+                self.data.append(
+                    {
+                        "file_path": os.path.join(directory_name, file),
+                        "file_type": file.rsplit(".")[-1],
+                        "parser_name": code_parser["parser_name"],
+                        "data": parser_data,
+                    }
+                )
 
 
 if __name__ == "__main__":
@@ -152,7 +165,7 @@ if __name__ == "__main__":
     IGNORE_FOLDERS = ["venv", "idea"]
     IGNORE_FILES = []
     # FOLDER = "test_files"
-    FOLDER = "./test_files/"
+    FOLDER = "./indicators/test_files/"
     parser = IndicatorsManager(load_parsers=False)
     parser.load_indicators()
     fiLES = parser.parse(
@@ -161,5 +174,3 @@ if __name__ == "__main__":
     print("Size of data: ", sys.getsizeof(parser.data))
     print("Time taken: ", datetime.now() - start_time)
     print(fiLES)
-
-

@@ -1,4 +1,4 @@
-from Indicators.abstract.base_parser import BaseParser
+from indicators.abstract.base_parser import BaseParser
 import magic
 
 
